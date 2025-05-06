@@ -5,6 +5,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 DotNetEnv.Env.Load();
 builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("openai",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5174")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -37,4 +47,5 @@ app.MapGet("/api/synonym/{word}", (string word) =>
     return response.Value.Content;
 });
 app.UseHttpsRedirection();
+app.UseCors("openai");
 app.Run();
