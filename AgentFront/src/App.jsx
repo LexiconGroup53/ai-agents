@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios';
 import './App.css'
+import {LMStudioClient} from "@lmstudio/sdk";
 
 function App() {
-  const [count, setCount] = useState(0);
   const [word, setWord] = useState('');
   const [synonyms, setSynonyms] = useState([]);
 
@@ -15,6 +15,14 @@ function App() {
   useEffect(() => {
     console.log(synonyms);
   }, [synonyms]);
+
+  useEffect( async () => {
+    const client = new LMStudioClient();
+
+    const model = await client.llm.model("gemma-3-12b-it-qat");
+    const result = await model.respond("What is the meaning of life?");
+    console.log(result.content);
+  }, [])
 
   return (
     <>
