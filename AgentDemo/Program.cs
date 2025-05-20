@@ -4,6 +4,7 @@ using Azure;
 using Azure.AI.Inference;
 using OpenAI;
 using OpenAI.Chat;
+using OpenAI.Images;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +38,25 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSession();
+
+app.MapPost("/api/image/single", (UserInput userInput) => {
+    OpenAIClient client = new(Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
+    ImageClient imageClient = client.GetImageClient("dall-e-3");
+
+    ImageGenerationOptions options = new()
+    {
+        Quality = GeneratedImageQuality.High,
+        Size = GeneratedImageSize.W1024xH1024,
+        Style = GeneratedImageStyle.Vivid,
+        ResponseFormat = GeneratedImageFormat.Bytes
+    };
+    
+    GeneratedImage image = imageClient.GenerateImage($"{userInput.Input}", options);;
+    
+    File.WriteAllBytes("Assets/generatedImage.png", image.ImageBytes.ToArray());
+    return "success";
+});
+
 app.MapPost("/api/chat/", (HttpContext _context, UserInput userInput) =>
 {
     OpenAIClient client = new(Environment.GetEnvironmentVariable("OPENAI_API_KEY"));
